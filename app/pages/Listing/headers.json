@@ -1,0 +1,40 @@
+{
+    "createdOn": {
+        "title": "Created On",
+        "type": "date",
+        "show": true,
+        "icon": "/calendar-header.svg"
+    },
+    "payer": {
+        "title": "Payer",
+        "type": "string",
+        "show": true,
+        "icon": "/user-header.svg"
+    },
+    "status": {
+        "title": "Status",
+        "type": "string",
+        "show": true,
+        "icon": "/status-header.svg"
+    },
+    "email": {
+        "title": "Email",
+        "type": "string",
+        "show": true
+    },
+    "phone": {
+        "title": "Payer Phone",
+        "type": "string",
+        "show": true
+    },
+    "services": {
+        "title": "Services",
+        "type": "string",
+        "show": true
+    },
+    "scheduled": {
+        "title": "Scheduled",
+        "type": "date",
+        "show": true
+    }
+}
