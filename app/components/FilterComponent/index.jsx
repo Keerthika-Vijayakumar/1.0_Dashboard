@@ -5,6 +5,7 @@ import React from "react";
 import Image from "next/image";
 import { SearchIcon } from '@nextui-org/shared-icons';
 import { Select, SelectItem, DatePicker, Input, RadioGroup, Radio } from "@nextui-org/react";
+import Utils from "@/app/utils";
 
 const schedules = [
     { key: "all", label: "All Time" },
@@ -25,8 +26,9 @@ class FilterComponent extends React.Component {
         this.state = {
             activeList: 'scheduledDate',
             searchDetails: {},
-            selectedSearchtext: ""
+            selectedSearchtext: "",
         }
+        this.formData = {}
     }
 
     onSideBarClick = (activeKey) => {
@@ -86,6 +88,16 @@ class FilterComponent extends React.Component {
         return sideBarList;
     }
 
+    handleInputChange = (event, title, key) => {
+        let value = "";
+        let { formData } = this;
+        if (event && event.calendar) {
+            value = Utils.getTimeStamp(event.year, event.month, event.day);
+        }
+        formData[title] = { ...formData[title], [key]: value }
+        this.props.updateFormData(formData);
+    }
+
     getScheduledContent = () => {
         return (
             <div className="flex flex-col w-full gap-4">
@@ -106,12 +118,14 @@ class FilterComponent extends React.Component {
                         className="max-w-[284px] flex-col items-start"
                         description={'Select From Date'}
                         labelPlacement={'outside-left'}
+                        onChange={(event) => this.handleInputChange(event, 'scheduled', 'fromDate')}
                     />
                     <DatePicker
                         label={"To"}
                         className="max-w-[284px] flex-col items-start"
                         description={'Select To Date'}
                         labelPlacement={'outside-left'}
+                        onChange={(event) => this.handleInputChange(event, 'scheduled', 'toDate')}
                     />
                 </div>
             </div>

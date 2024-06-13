@@ -2,8 +2,8 @@
 
 // external dependency
 import React from "react";
-import { Button, Image, Input } from "@nextui-org/react";
 import { SearchIcon } from "@nextui-org/shared-icons";
+import { Button, Image, Input } from "@nextui-org/react";
 
 //Internal dependency
 import Utils from '../../utils/index';
@@ -24,9 +24,12 @@ class Listing extends React.Component {
             isModalOpen: false,
             data: DataSource,
             columns: [],
-            isFilterModalOpen: false
+            isFilterModalOpen: false,
+            filteredData: []
         }
-        this.tabs = ['All', 'Newly Added', 'Leads']
+        this.tabs = ['All', 'Newly Added', 'Leads'];
+        this.csvRef = React.createRef();
+        this.isFilter = false;
     }
 
     componentDidMount() {
@@ -68,6 +71,19 @@ class Listing extends React.Component {
         })
         this.setState({ columns, isModalOpen: false });
         return;
+    }
+
+    onFilterApply = (formData) => {
+        console.log('formData', formData);
+        const { data } = this.state;
+        let filteredData = [];
+        for (let key in formData) {
+            filteredData = data.filter((row) => row[key] && (row[key] >= formData[key]['fromDate'] && row[key] <= formData[key]['toDate']));
+        }
+        if (filteredData && filteredData.length) {
+            this.isFilter = true;
+            this.setState({ filteredData })
+        }
     }
 
     isChecked = (id) => {
@@ -114,8 +130,39 @@ class Listing extends React.Component {
         }
     }
 
+    convertArrayOfObjectsToCSV = (array) => {
+        const keys = Object.keys(array[0]);
+        const csvRows = [];
+        csvRows.push(keys.join(','));
+        array.forEach(obj => {
+            const values = keys.map(key => {
+                const escapedValue = ('' + obj[key]).replace(/"/g, '\\"');
+                return `"${escapedValue}"`;
+            });
+            csvRows.push(values.join(','));
+        });
+
+        return csvRows.join('\n');
+    };
+
+    downloadCSV = (csvString, filename) => {
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', filename);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+
+    exportTableData = () => {
+        const { data } = this.state;
+        const csvString = this.convertArrayOfObjectsToCSV(data);
+        this.downloadCSV(csvString, 'data.csv');
+    };
+
     renderTabContent = () => {
-        const { columns, data } = this.state;
+        const { columns, data, filteredData } = this.state;
         return (
             <>
                 <div className="flex justify-between items-center my-4">
@@ -127,14 +174,14 @@ class Listing extends React.Component {
                             onChange={this.onSearch}
                             className="fill-transparent"
                         />
-                        <Button isIconOnly={true} startContent={<Image src="./refresh.svg" />} className="bg-[transparent] font-medium text-xs"></Button>
+                        <Button onClick={() => { this.isFilter = false; this.setState({ filteredData: [] }) }} isIconOnly={true} startContent={<Image src="./refresh.svg" />} className="bg-[transparent] font-medium text-xs"></Button>
                         <Button isIconOnly={true} onClick={() => this.onClickEdit()} startContent={<Image src="./columns.svg" />} className="bg-[transparent] font-medium text-xs"></Button>
-                        <Button isIconOnly={true} startContent={<Image src="./download.svg" />} className="bg-[transparent] font-medium text-xs"></Button>
+                        <Button onClick={() => { this.exportTableData() }} isIconOnly={true} startContent={<Image src="./download.svg" />} className="bg-[transparent] font-medium text-xs"></Button>
                     </div>
                 </div>
                 {columns && columns.length && <Table
                     columns={columns}
-                    dataSource={data}
+                    dataSource={this.isFilter ? filteredData : data}
                     pagination={true}
                     itemPerPage={15}
                 />}
@@ -144,14 +191,14 @@ class Listing extends React.Component {
 
     render() {
         const { activeList } = this.props;
-        const { isFilterModalOpen, isModalOpen, columns, data } = this.state;
+        const { isFilterModalOpen, isModalOpen, columns, data, filteredData } = this.state;
 
         return (
             <div className="bg-white w-full h-screen py-3 px-4">
                 <PageHeader
                     title={activeList.title}
                     tabs={this.tabs}
-                    data={data}
+                    data={this.isFilter ? filteredData : data}
                     renderTabContent={this.renderTabContent}
                 />
                 {
@@ -159,7 +206,7 @@ class Listing extends React.Component {
                         <ModalComponent
                             columns={columns}
                             isModalOpen={isFilterModalOpen}
-                            onSave={this.onSave}
+                            onSave={this.onFilterApply}
                             isFilter={true}
                             modalSize={'3xl'}
                             noHeader={true}

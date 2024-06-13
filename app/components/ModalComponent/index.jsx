@@ -11,7 +11,8 @@ class ModalComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isModalOpen: this.props.isModalOpen
+            isModalOpen: this.props.isModalOpen,
+            formData: {}
         }
         this.updatedColumns = {};
     }
@@ -57,18 +58,25 @@ class ModalComponent extends React.Component {
         return editableColumns;
     }
 
+    updateFormData = (formData) => {
+        this.setState({ formData })
+    }
+
     getFilterLayout = () => {
-        return <FilterComponent />
+        return <FilterComponent
+            updateFormData={this.updateFormData}
+        />
     }
 
     getFooterButton = () => {
         const { onSave, isFilter } = this.props;
+        const { formData } = this.state;
         return (
             <>
                 <Button className="bg-transparent">
                     Reset to Default
                 </Button>
-                <Button className="bg-black text-white" onClick={() => !isFilter ? onSave(this.updatedColumns) : ""}>
+                <Button className="bg-black text-white" onClick={() => !isFilter ? onSave(this.updatedColumns) : onSave(formData)}>
                     Apply
                 </Button>
             </>

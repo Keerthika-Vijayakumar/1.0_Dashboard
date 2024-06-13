@@ -37,4 +37,9 @@ export default class Utils {
         const time = this.getTimeAMPMFormat(dateString)
         return `${day}, ${date} ${month} ${year} ${time}`;
     }
+
+    static getTimeStamp = (year, month, day) => {
+        const date = new Date(year, month, day);
+        return date.getTime();
+    }
 }

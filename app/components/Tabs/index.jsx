@@ -32,8 +32,9 @@ class TabComponent extends React.Component {
                     tabContent: "text-textGray font-semibold text-xs group-data-[selected=true]:text-[black]"
                 }}
                 className=" w-full"
+                key={'tab-layout'}
             >
-                {tabs.map((element) => {
+                {tabs.map((element, index) => {
                     return (
                         <Tab
                             className="bg-transparent"
@@ -45,6 +46,7 @@ class TabComponent extends React.Component {
                                     < span className="px-2 text-borderBlue text-[10px]">{(data && data.length)}</span>
                                 </>
                             }
+                            key={`${element}-${index}}`}
                         >
                             {this.renderTabContent()}
                         </Tab >
